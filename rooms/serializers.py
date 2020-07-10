@@ -12,19 +12,11 @@ class ReadRoomSerializer(serializers.ModelSerializer):
         exclude = ("modified",)
 
 
-class WriteRoomSerializer(serializers.Serializer):
-
-    name = serializers.CharField(max_length=140)
-    address = serializers.CharField(max_length=140)
-    price = serializers.IntegerField(help_text="USD per night")
-    beds = serializers.IntegerField(default=1)
-    lat = serializers.DecimalField(max_digits=10, decimal_places=6)
-    lng = serializers.DecimalField(max_digits=10, decimal_places=6)
-    bedrooms = serializers.IntegerField(default=1)
-    bathrooms = serializers.IntegerField(default=1)
-    check_in = serializers.TimeField(default="00:00:00")
-    check_out = serializers.TimeField(default="00:00:00")
-    instant_book = serializers.BooleanField(default=False)
+class WriteRoomSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Room
+        exclude = ("modified", "user", "created")
 
     # 항상 create를 통해 만들어진 objects를 반환해야 함.
     # 안 그러면 에러 남: `create()` must be implemented.
@@ -55,22 +47,4 @@ class WriteRoomSerializer(serializers.Serializer):
         # validated data에 data가 들어가지 않는다.
         return data 
 
-    def update(self, instance, validated_data):
-        # 이렇게 해주면 partial update 해준 항목만 새로 넣어주고, 
-        # 나머지는 기존 것 그대로 넣어줄 수 있음.
-        instance.name = validated_data.get("name", instance.name)
-        instance.address = validated_data.get("address", instance.address)
-        instance.price = validated_data.get("price", instance.price)
-        instance.beds = validated_data.get("beds", instance.beds)
-        instance.lat = validated_data.get("lat", instance.lat)
-        instance.lng = validated_data.get("lng", instance.lng)
-        instance.bedrooms = validated_data.get("bedrooms", instance.bedrooms)
-        instance.bathrooms = validated_data.get(
-            "bathrooms", instance.bathrooms)
-        instance.check_in = validated_data.get("check_in", instance.check_in)
-        instance.check_out = validated_data.get(
-            "check_out", instance.check_out)
-        instance.instant_book = validated_data.get(
-            "instant_book", instance.instant_book)
-        instance.save()
-        return instance
+ 
