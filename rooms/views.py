@@ -60,7 +60,8 @@ class RoomView(APIView):
             if serializer.is_valid():
                 # save를 하면 처음 만들어질 때는 serializer의 create 함수를,
                 # 그 다음에 업데이트할 때부터는 update 함수를 실행시킨다.
-                serializer.save()
+                room = serializer.save()
+                return Response(ReadRoomSerializer(room).data)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             return Response()
