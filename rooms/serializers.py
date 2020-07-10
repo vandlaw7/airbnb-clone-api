@@ -37,13 +37,16 @@ class WriteRoomSerializer(serializers.Serializer):
     # validate는 create와 마찬가지로 특별한 이름이다.
     # 이 이름이 아니면 자동으로 validation이 일어나지 않는다. 
     def validate(self, data): 
-        check_in = data.get('check_in')
-        check_out = data.get('check_out')
-        if check_in == check_out:
-            print("check in: ", check_in)
-            print("check out: ", check_out)
-            raise serializers.ValidationError("Not enough time between changes")
-        else:
-            # 여기서 return data를 하지 않으면 위 함수의 
-            # validated data에 data가 들어가지 않는다.
-            return data
+        # 이렇게 해주면 나중에 update할 때 validate 검사를 하지 않게 할 수 있다.
+        if not self.instance:
+            check_in = data.get('check_in')
+            check_out = data.get('check_out')
+            if check_in == check_out:
+                raise serializers.ValidationError("Not enough time between changes")
+
+        # 여기서 return data를 하지 않으면 위 함수의 
+        # validated data에 data가 들어가지 않는다.
+        return data
+
+    def update(self, instance, validated_data):
+        print(instance, validated_data )

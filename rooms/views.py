@@ -17,7 +17,7 @@ class RoomsView(APIView):
         if not request.user.is_authenticated:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         serializer = WriteRoomSerializer(data=request.data)
-        print(serializer)
+        # print(serializer)
         if serializer.is_valid():
             # create를 직접 call하지 않고 save method를 call해야 한다.
             # create인지 update인지 serializer가 알아냄
@@ -31,19 +31,50 @@ class RoomsView(APIView):
 
 
 class RoomView(APIView):
-    
-    def get(self, request, pk):
+
+    def get_room(self, pk):
         try:
             room = Room.objects.get(pk=pk)
+            return room
+        except Room.DoesNotExist:
+            return None
+    
+    def get(self, request, pk):
+        room = self.get_room(pk)
+        if room is not None:
             serializer = ReadRoomSerializer(room).data
             return Response(serializer)
-        except Room.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response(status = status.HTTP_404_NOT_FOUND)
+  
+    # update
+    def put(self, request, pk):
+        room = self.get_room(pk)
+        if room is not None:
+            if room.user != request.user:
+                return Response(status=status.HTTP_403_FORBIDDEN)
+            # WirteRoomSerializer의 첫번째 argument로 room을 넣어주지 않으면,
+            # update가 아니라 create로 인식한다. 반드시 넣어줘야 함.
+            # partial을 넣어줌으로써 모든 required field를 입력하지 않아도 됨
+            serializer = WriteRoomSerializer(room, data=request.data, partial=True)
+            if serializer.is_valid():
+                # save를 하면 처음 만들어질 때는 serializer의 create 함수를,
+                # 그 다음에 업데이트할 때부터는 update 함수를 실행시킨다.
+                serializer.save()
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response()
+        else:
+            return Response(status = status.HTTP_404_NOT_FOUND)
 
-    def put(self, request):
-        pass
-
-    def delete(self, request):
-        pass
+    def delete(self, request, pk):
+        room = self.get_room(pk)
+        if room.user != request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        if room is not None:
+            room.delete()
+            return Response(status = status.HTTP_200_OK)
+        else:
+            return Response(status = status.HTTP_404_NOT_FOUND)
 
 
