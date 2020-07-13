@@ -17,7 +17,7 @@ class WriteRoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = Room
         exclude = ("modified", "user", "created")
-
+    # wowow
     # 항상 create를 통해 만들어진 objects를 반환해야 함.
     # 안 그러면 에러 남: `create()` must be implemented.
     # 만든 후에 만들어진 객체를 프론트 단에 쏴줘서 유저에게 보여준다.
