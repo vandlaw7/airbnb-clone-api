@@ -28,6 +28,7 @@ class ReadUserSerializer(serializers.ModelSerializer):
             "is_active",
             "is_superuser",
             "date_joined",
+            "favs",
         )
 
 
@@ -42,7 +43,8 @@ class WriteUserSerialize(serializers.ModelSerializer):
             "email",
         )
 
+    ''' You can specify custom field-level validation by adding .validate_<field_name> methods to your Serializer subclass. '''
+    # validate_필드명 은 특별한 이름임. 알아서 value 값을 DRF가 찾아감.
     def validate_first_name(self, value):
         print(value)
         return value.upper()
-

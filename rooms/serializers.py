@@ -3,28 +3,23 @@ from users.serializers import RelatedUserSerializer
 from .models import Room
 
 
-class ReadRoomSerializer(serializers.ModelSerializer):
-
+class RoomSerializer(serializers.ModelSerializer):
+    
     user = RelatedUserSerializer()
 
     class Meta:
         model = Room
         exclude = ("modified",)
+        read_only_fields = ("user", "id", "created", "updated")
 
-
-class WriteRoomSerializer(serializers.ModelSerializer):
-    
-    class Meta:
-        model = Room
-        exclude = ("modified", "user", "created")
-    # wowow
+    ## Serializer를 좀 더 자동화하면서 create를 없애줌(2.7)
     # 항상 create를 통해 만들어진 objects를 반환해야 함.
     # 안 그러면 에러 남: `create()` must be implemented.
     # 만든 후에 만들어진 객체를 프론트 단에 쏴줘서 유저에게 보여준다.
 
-    def create(self, validated_data):
-        ## **는 object의 unpacking을 의미함
-        return Room.objects.create(**validated_data)
+    # def create(self, validated_data):
+    #     ## **는 object의 unpacking을 의미함
+    #     return Room.objects.create(**validated_data)
 
     # validate는 create와 마찬가지로 특별한 이름이다.
     # 이 이름이 아니면 자동으로 validation이 일어나지 않는다.
