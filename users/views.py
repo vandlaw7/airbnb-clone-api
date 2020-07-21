@@ -5,8 +5,18 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rooms.models import Room
 from .models import User
-from .serializers import ReadUserSerializer, WriteUserSerialize
+from .serializers import UserSerializer, UserSerializer
 from rooms.serializers import RoomSerializer
+
+
+class UsersView(APIView):
+    def post(self, request):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            new_user = serializer.save()
+            return Response(UserSerializer(new_user).data)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class MeView(APIView):
@@ -15,10 +25,10 @@ class MeView(APIView):
 
     def get(self, request):
         if request.user.is_authenticated:
-            return Response(ReadUserSerializer(request.user).data)
+            return Response(UserSerializer(request.user).data)
 
     def put(self, request):
-        serializer = WriteUserSerialize(
+        serializer = UserSerializer(
             request.user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -26,15 +36,6 @@ class MeView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response()
-
-
-@api_view(["GET"])
-def user_detail(request, pk):
-    try:
-        user = User.objects.get(pk=pk)
-        return Response(ReadUserSerializer(user).data)
-    except User.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 # @api_view(["GET", "POST"])
@@ -67,7 +68,15 @@ class FavsView(APIView):
                 return Response()
 
             except Room.DoesNotExist:
-                print(2)
+                pass
         else:
-            print(1)
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["GET"])
+def user_detail(request, pk):
+    try:
+        user = User.objects.get(pk=pk)
+        return Response(UserSerializer(user).data)
+    except User.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
